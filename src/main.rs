@@ -42,13 +42,13 @@ impl Display {
         });
     }
 
-    fn render_line(&mut self, args: &RenderArgs) {
-        const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+    // fn render_line(&mut self, args: &RenderArgs) {
+    //     const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
     
-        self.gl.draw(args.viewport(), |c, gl| {
-            graphics::line(BLACK, 0.5, [0.0, 0.0, 500.0, 500.0], c.transform, gl);
-        });
-    }
+    //     self.gl.draw(args.viewport(), |c, gl| {
+    //         graphics::line(BLACK, 0.5, [0.0, 0.0, 500.0, 500.0], c.transform, gl);
+    //     });
+    // }
 }
 
 /* Parsing -------------------------------------------------------- */
@@ -76,16 +76,27 @@ fn load_file(args: &[String]) -> Vec<(i32, i32)> { // TODO : real parsing and se
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let datas: Vec<(i32, i32)> = load_file(&args);
+    let datas: Vec<(i32, i32)> = load_file(&args); // km, price
+    let max_km: i32 = datas.iter().max_by_key(|data| data.0).unwrap().0;
+    let max_price: i32 = datas.iter().max_by_key(|data| data.1).unwrap().1;
     
     let opengl = OpenGL::V3_2;
-    let mut window: Window = WindowSettings::new("Perceptron", [500, 500]).graphics_api(opengl).exit_on_esc(true).build().unwrap();
+    let mut window: Window = WindowSettings::new("ft_linear_regression", [500, 500]).graphics_api(opengl).exit_on_esc(true).build().unwrap();
     let mut display = Display::new(opengl);
     let mut events = Events::new(EventSettings::new());
+
+    let padding: f64 = 50.0;
+    let point_size: f64 = 10.0;
 
     while let Some(e) = events.next(&mut window) {
         if let Some(args) = e.render_args() {
             display.clear(&args);
+            for data in datas.iter() {
+                let x = padding + (data.0 as f64 * (500.0 - padding * 2.0) / max_km as f64);
+                let y = (500.0 - padding) - (data.1 as f64 * (500.0 - padding * 2.0) / max_price as f64);
+                display.render_point(&args, x - (point_size / 2.0), y - (point_size / 2.0), point_size, [0.0, 0.0, 0.0, 1.0]);
+                display.render_point(&args, 250.0 - (point_size / 2.0), 250.0 - (point_size / 2.0), point_size, [1.0, 0.0, 0.0, 1.0]);
+            }
         }
     }
 }
