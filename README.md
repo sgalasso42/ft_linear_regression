@@ -16,17 +16,22 @@ Then you can build the project
 ---
 ## Learn usage
 ```
-> cargo run --release --bin learn data/data.csv [OPTIONS] 
+> ./target/release/learn <file> [OPTIONS]
+```
+### Flags
+```
+-h, --help       Prints help information
+-V, --version    Prints version information
 ```
 ### Options
 ```
--a <algorithm>         Algorithm selection, choose from 'ols' or 'gradient'
+-a, --algo <algo>    Algo selection, choose from 'ols' or 'gradient'
 ```
 
 ---
 ## Predict usage
 ```
-> cargo run --release --bin predict
+> ./target/release/predict
 ```
 
 ---
