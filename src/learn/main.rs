@@ -9,7 +9,8 @@ mod parsing;
 mod graphics;
 
 use crate::graphics::render::*;
-use crate::parsing::load_file::*;
+use crate::parsing::parse::*;
+use crate::parsing::args::*;
 
 // BONUS
 // visualisator
@@ -50,12 +51,12 @@ fn gradient_descent(dataset: &Vec<Pos>, m: &mut f64, b: &mut f64) {
 }
 
 fn main() {
-    let (dataset, algo, filename): (Vec<Pos>, Algo, String) = load_file();
-    println!("Data file used: {}", filename);
-    println!("Chosen algorithm: {:?}", algo);
+    let config: Config = Config::new();
+    let dataset: Vec<Pos> = parse_file(&config);
+    println!("Data file: {}", config.file);
+    println!("Algorithm: {:?}", config.algo);
 
     let size: f64 = 500.0;
-
     let opengl = OpenGL::V3_2;
     let mut window: GlutinWindow = WindowSettings::new("ft_linear_regression", [size, size])
         .graphics_api(opengl)
@@ -78,9 +79,9 @@ fn main() {
             }
 
             // linear regression
-            match &algo {
+            match config.algo {
                 Algo::Ols => ordinary_least_squares(&dataset, &mut m, &mut b),
-                Algo::Gradient => gradient_descent(&dataset, &mut m, &mut b)
+                Algo::Gradient => gradient_descent(&dataset, &mut m, &mut b),
             }
             
             // line display

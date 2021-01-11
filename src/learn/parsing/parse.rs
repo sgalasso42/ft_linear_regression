@@ -1,18 +1,19 @@
 use std::fs::File;
+use std::fs::metadata;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::env;
 
+use crate::parsing::args::*;
 use crate::graphics::render::*;
 use crate::maths::scale::*;
 
-#[derive(Debug)]
-pub enum Algo {
-	Gradient, Ols
-}
-
-fn parse_file(file: File) -> Vec<Pos> {
+pub fn parse_file(config: &Config) -> Vec<Pos> {
+	if !metadata(&config.file).expect("error: A problem occured with the file").is_file() {
+        panic!("error: The file should be a file, I mean a real one, not a directory, hum... guess you got it");
+	}
+	let file = File::open(&config.file).expect("error: file not found");
 	let lines: Vec<_> = BufReader::new(file).lines().collect();
+
 	let mut dataset: Vec<Pos> = Vec::new();
 	let mut max_values: Pos = Pos::new(0.0, 0.0);
 	for (i, line) in lines.into_iter().enumerate() {
@@ -37,16 +38,4 @@ fn parse_file(file: File) -> Vec<Pos> {
 		y: scale(value.y, 0.0, max_values.y, 0.0, 1.0),
 	}).collect();
 	return scaled_dataset;
-}
-
-pub fn load_file() -> (Vec<Pos>, Algo, String) {
-	let args: Vec<String> = env::args().collect();
-	let mut algo: Algo = Algo::Gradient;
-	if args.len() < 2 {
-		panic!("error: bad args number")	
-	} else if args.len() == 3 && args[2] == "Ols" {
-		algo = Algo::Ols;
-	}
-	let file = File::open(&args[1]).expect("error: can't open the file");
-	return (parse_file(file), algo, args[1].clone());
 }
