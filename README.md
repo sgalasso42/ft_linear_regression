@@ -14,9 +14,19 @@ Then you can build the project
 ```
 
 ---
-## Usage
+## Learn usage
 ```
-> ./target/release/ft_linear_regression
+> cargo run --release --bin learn data/data.csv [OPTIONS] 
+```
+### Options
+```
+-a <algorithm>         Algorithm selection, choose from 'ols' or 'gradient'
+```
+
+---
+## Predict usage
+```
+> cargo run --release --bin predict
 ```
 
 ---
