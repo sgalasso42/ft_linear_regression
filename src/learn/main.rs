@@ -9,10 +9,12 @@ mod maths;
 mod parsing;
 mod game;
 mod algo;
+mod output;
 
 use crate::game::game::*;
 use crate::parsing::parse::*;
 use crate::parsing::args::*;
+use crate::output::export::*;
 
 // BONUS IDEAS
 // scatter plot & residual plot representation (https://www.youtube.com/watch?v=_cXuvTQl090&list=PLRqwX-V7Uu6bCN8LKrcMa6zF4FPtXyXYj&index=6)
@@ -34,4 +36,6 @@ fn main() {
             game.update(&config);
         }
     }
+
+    export_to_file(&game);
 }
