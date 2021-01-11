@@ -1,9 +1,7 @@
-extern crate opengl_graphics;
-extern crate piston;
-
-use crate::maths::scale::*;
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::input::{RenderArgs};
+
+use crate::maths::scale::*;
 
 // pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 pub const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];

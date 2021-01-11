@@ -1,5 +1,4 @@
 use clap::{Arg, App};
-// use std::ffi::OsString;
 
 #[derive(Debug, PartialEq)]
 pub enum Algo {
@@ -13,10 +12,6 @@ pub struct Config {
 }
 
 impl Config {
-    // pub fn new() -> Self {
-    //     Self::new_from(std::env::args_os().into_iter()).unwrap_or_else(|e| e.exit())
-    // }
-    // fn new_from<I, T>(args: I) -> Result<Self, clap::Error> where I: Iterator<Item = T>, T: Into<OsString> + Clone {
     pub fn new() -> Self {
         let matches = App::new("learn")
             .version("0.1.0")

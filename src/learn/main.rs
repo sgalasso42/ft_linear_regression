@@ -1,13 +1,12 @@
 use glutin_window::GlutinWindow;
-use opengl_graphics::{OpenGL};
-use piston::event_loop::{EventSettings, Events};
+use piston::event_loop::{Events};
 use piston::input::{RenderEvent};
-use piston::window::WindowSettings;
 
 mod maths;
 mod parsing;
 mod graphics;
 
+use crate::graphics::setup::*;
 use crate::graphics::render::*;
 use crate::parsing::parse::*;
 use crate::parsing::args::*;
@@ -55,16 +54,9 @@ fn main() {
     let dataset: Vec<Pos> = parse_file(&config);
     println!("Data file: {}", config.file);
     println!("Algorithm: {:?}", config.algo);
-
-    let size: f64 = 500.0;
-    let opengl = OpenGL::V3_2;
-    let mut window: GlutinWindow = WindowSettings::new("ft_linear_regression", [size, size])
-        .graphics_api(opengl)
-        .exit_on_esc(true)
-        .build()
-        .unwrap();
-    let mut display = Display::new(opengl, size, 20.0);
-    let mut events = Events::new(EventSettings::new());
+    
+    let window_size: f64 = 500.0;
+    let (mut window, mut display, mut events): (GlutinWindow, Display, Events) = graphic_setup(window_size);
 
     let mut m: f64 = 0.0;
     let mut b: f64 = 0.0;
