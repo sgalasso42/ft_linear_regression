@@ -5,11 +5,11 @@ use crate::maths::scale::*;
 use opengl_graphics::{GlGraphics, OpenGL};
 use piston::input::{RenderArgs};
 
-pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+// pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 pub const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-pub const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-pub const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
+// pub const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+// pub const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+// pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
 pub const GREY1: [f32; 4] = [0.11, 0.11, 0.11, 1.0];
 
@@ -58,17 +58,17 @@ impl Display {
             graphics::ellipse(color, square, c.transform, gl);
         });
     }
-    pub fn render_rectangle(&mut self, args: &RenderArgs, pos: &Pos, size: f64, color: [f32; 4]) {
-        let scaled_pos: Pos = Pos {
-            x: scale(pos.x, 0.0, 1.0, 0.0, self.size),
-            y: scale(pos.y, 0.0, 1.0, self.size, 0.0)
-        };
-        let square = graphics::rectangle::square(scaled_pos.x - size / 2.0, scaled_pos.y - size / 2.0, size);
+    // pub fn render_rectangle(&mut self, args: &RenderArgs, pos: &Pos, size: f64, color: [f32; 4]) {
+    //     let scaled_pos: Pos = Pos {
+    //         x: scale(pos.x, 0.0, 1.0, 0.0, self.size),
+    //         y: scale(pos.y, 0.0, 1.0, self.size, 0.0)
+    //     };
+    //     let square = graphics::rectangle::square(scaled_pos.x - size / 2.0, scaled_pos.y - size / 2.0, size);
 
-        self.gl.draw(args.viewport(), |c, gl| {
-            graphics::rectangle(color, square, c.transform, gl);
-        });
-    }
+    //     self.gl.draw(args.viewport(), |c, gl| {
+    //         graphics::rectangle(color, square, c.transform, gl);
+    //     });
+    // }
     pub fn render_line(&mut self, args: &RenderArgs, pos0: &Pos, pos1: &Pos, size: f64, color: [f32; 4]) {
         let scaled_pos0: Pos = Pos {
             x: scale(pos0.x, 0.0, 1.0, 0.0, self.size),
