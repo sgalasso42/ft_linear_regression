@@ -3,8 +3,8 @@ use std::fs::metadata;
 use std::io::prelude::*;
 use std::io::BufReader;
 
+use crate::game::game::*;
 use crate::parsing::args::*;
-use crate::graphics::render::*;
 use crate::maths::scale::*;
 
 pub fn parse_file(config: &Config) -> Vec<Pos> {
@@ -17,7 +17,7 @@ pub fn parse_file(config: &Config) -> Vec<Pos> {
 	let mut dataset: Vec<Pos> = Vec::new();
 	let mut max_values: Pos = Pos::new(0.0, 0.0);
 	for (i, line) in lines.into_iter().enumerate() {
-        if i > 0 {
+    	if i > 0 {
 			if let Ok(content) = line {
 				let values: Vec<&str> = content.split(",").collect();
 				// securiser ici
