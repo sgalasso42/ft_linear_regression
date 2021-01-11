@@ -31,7 +31,7 @@ Then you can build the project
 ---
 ## Predict usage
 ```
-> ./target/release/predict
+> ./target/release/predict output/save.txt
 ```
 
 ---
