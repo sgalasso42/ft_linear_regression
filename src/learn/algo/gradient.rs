@@ -1,25 +1,34 @@
 use crate::game::game::*;
 
 pub fn gradient_descent(game: &mut Game) {
-    let learning_rate: f64 = 0.2;
-    let (msum, bsum, squared_residual): (f64, f64, f64) = error_sum(game);
-    let m_tmp = (learning_rate * msum) / game.dataset.len() as f64;
-    let b_tmp = (learning_rate * bsum) / game.dataset.len() as f64;
-    game.srsum_list.push(squared_residual);
-    game.m += m_tmp;
-    game.b += b_tmp;
+    let learning_rate: f64 = 0.01;
+    if game.step_nb < 1000 {
+        game.step_nb += 1;
+        let (srs_b_d, srs_m_d): (f64, f64) = calculate_srs_derivative(game);
+        let b_step_size: f64 = srs_b_d * learning_rate;
+        let m_step_size: f64 = srs_m_d * learning_rate;
+        if b_step_size.abs() <= 0.001 && m_step_size.abs() <= 0.001 {
+            game.linear_regression_finshed = true;
+        }
+        game.b -= b_step_size;
+        game.m -= m_step_size;
+    }
 }
 
-fn error_sum(game: &Game) -> (f64, f64, f64) {
-    let mut msum: f64 = 0.0;
-    let mut bsum: f64 = 0.0;
-    let mut squared_residual: f64 = 0.0;
+fn calculate_srs_derivative(game: &mut Game) -> (f64, f64) {
+    let mut srs_b_d: f64 = 0.0;
+    let mut srs_m_d: f64 = 0.0;
+    let mut srs_b: f64 = 0.0;
+    let mut srs_m: f64 = 0.0;
     for data in game.dataset.iter() {
         let guess = game.b + game.m * data.x;
         let error = data.y - guess;
-        squared_residual += error * error;
-        msum += error * data.x;
-        bsum += error;
+        srs_b += error * error;
+        srs_m += (data.x * error) * (data.x * error);
+        srs_b_d += -2.0 * error;
+        srs_m_d += -2.0 * data.x * error;
     }
-    return (msum, bsum, squared_residual);
+    game.srs_b_list.push(srs_b);
+    game.srs_m_list.push(srs_m);
+    return (srs_b_d, srs_m_d);
 }
