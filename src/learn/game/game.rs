@@ -79,9 +79,12 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn setup(dataset: Vec<Pos>, window_w: f64, window_h: f64) -> Self {
+    pub fn setup(algo: &Algo, dataset: Vec<Pos>, window_w: f64, window_h: f64) -> Self {
         let opengl: OpenGL = OpenGL::V3_2;
-        let window: GlutinWindow = WindowSettings::new("learn", [window_w, window_h])
+        let window: GlutinWindow = WindowSettings::new(match algo {
+            Algo::Ols => "learn - ordinary least squares",
+            _ => "learn - gradient descent"
+        }, [window_w, window_h])
             .graphics_api(opengl)
             .exit_on_esc(true)
             .build()

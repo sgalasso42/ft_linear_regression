@@ -21,7 +21,7 @@ fn main() {
     let (dataset, max_values): (Vec<Pos>, Pos) = parse_file(&config);
     println!("Data file: {}", config.file);
     println!("Algorithm: {:?}", config.algo);
-    let mut game: Game = Game::setup(dataset, 600.0, 600.0);
+    let mut game: Game = Game::setup(&config.algo, dataset, 600.0, 600.0);
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut game.window) {
