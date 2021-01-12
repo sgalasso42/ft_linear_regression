@@ -13,13 +13,16 @@ pub fn parse_file(config: &Config) -> (Vec<Pos>, Pos) {
 	}
 	let file = File::open(&config.file).expect("error: file not found");
 	let lines: Vec<_> = BufReader::new(file).lines().collect();
-	// securiser parsing
+
 	let mut dataset: Vec<Pos> = Vec::new();
 	let mut max_values: Pos = Pos::new(0.0, 0.0);
 	for (i, line) in lines.into_iter().enumerate() {
     	if i > 0 {
 			if let Ok(content) = line {
 				let values: Vec<&str> = content.split(",").collect();
+				if values.len() != 2 {
+					panic!("error: Bad file format");
+				}
 				let km: f64 = values[0].parse::<f64>().expect("error: bad character");
 				let price: f64 = values[1].parse::<f64>().expect("error: bad character");
 				if km > max_values.x {
@@ -32,6 +35,11 @@ pub fn parse_file(config: &Config) -> (Vec<Pos>, Pos) {
 			}
 		}
 	}
+
+	if dataset.len() < 2 {
+		panic!("error: not enough datas");
+	}
+
 	return (dataset.iter().map(|value| Pos {
 		x: scale(value.x, 0.0, max_values.x, 0.0, 1.0),
 		y: scale(value.y, 0.0, max_values.y, 0.0, 1.0),

@@ -3,11 +3,10 @@ use std::io::prelude::*;
 use std::path::Path;
 
 use crate::game::game::*;
-use crate::maths::scale::*;
 
 pub fn export_to_file(game: &Game) {
-    let m = game.m.to_string();
-    let b = scale(game.b as f64, 0.0, 1.0, 0.0, game.max_values.y).to_string();
+    let b = game.b * game.max_values.y;
+    let m = (game.m * game.max_values.y) / game.max_values.x;
     let output = format!("m,b\n{:.10},{:.10}", m, b);
     let path = Path::new("output/save.csv");
     let display = path.display();

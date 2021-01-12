@@ -2,7 +2,6 @@ use crate::game::game::*;
 use crate::output::export::*;
 
 pub fn ordinary_least_squares(game: &mut Game) {
-    // [!] to protect : check if game.dataset.len() > 1 (because line need two points)
     let mut xsum: f64 = 0.0;
     let mut ysum: f64 = 0.0;
     for data in game.dataset.iter() {
@@ -17,7 +16,7 @@ pub fn ordinary_least_squares(game: &mut Game) {
         num += (data.x - x_average) * (data.y - y_average);
         den += (data.x - x_average) * (data.x - x_average);
     }
-    game.m = num / den; // [!] to protect : can be 0 if all x values are the same
+    game.m = num / den;
     game.b = y_average - game.m * x_average;
     game.linear_regression_finshed = true;
     export_to_file(&game);

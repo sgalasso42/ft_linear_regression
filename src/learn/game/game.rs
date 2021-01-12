@@ -17,9 +17,6 @@ use crate::algo::ols::*;
 pub const GREY1: [f32; 4] = [0.11, 0.11, 0.11, 1.0];
 pub const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
-// pub const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-// pub const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-// pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
 pub struct Space {
     pub x0: f64,
@@ -196,7 +193,6 @@ impl Game {
         let ellipse_size: f64 = 5.0;
         let max_b_sum: f64 = max_f64(&self.srs_b_list);
         let max_m_sum: f64 = max_f64(&self.srs_m_list);
-
         let mut squares: Vec<graphics::types::Rectangle> = Vec::new();
         for (index, (sum_m, sum_b)) in self.srs_m_list.iter().zip(self.srs_b_list.iter()).enumerate() {
             let scaled_sum_b: f64 = scale(*sum_b, 0.0, max_b_sum, 0.0, 1.0);
@@ -216,8 +212,6 @@ impl Game {
                 ellipse_size)
             );
         }
-
-        // render points
         self.gl.draw(event.viewport(), |context, gl| {
             squares.into_iter().for_each(|square| graphics::ellipse(WHITE, square, context.transform, gl));
         });

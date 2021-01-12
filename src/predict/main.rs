@@ -5,7 +5,6 @@ mod parsing;
 use crate::parsing::parse::*;
 use crate::parsing::args::*;
 
-// A securiser
 fn main() {
     let config: Config = Config::new();
     let (m, b): (f64, f64) = parse_file(&config);
@@ -13,11 +12,11 @@ fn main() {
     println!("m: {}\nb: {}", m, b);
 
     print!("Enter the km value: ");
-    io::stdout().flush().unwrap();
+    io::stdout().flush().expect("error: can't flush the stdout");
     let stdin = io::stdin();
     let mut iterator = stdin.lock().lines();
     let line = iterator.next().unwrap().unwrap();
-    let km: u32 = line.parse().unwrap();
+    let km: u32 = line.parse().expect("error: the value provided is not a valid number");
 
     let estimated_price: f64 = b + m * km as f64;
 
