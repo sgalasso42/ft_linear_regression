@@ -70,6 +70,7 @@ pub struct Game {
     pub window: GlutinWindow,
     pub gl: GlGraphics,
     pub dataset: Vec<Pos>,
+    pub max_values: Pos,
     pub srs_b_list: Vec<f64>,
     pub srs_m_list: Vec<f64>,
     pub m: f64,
@@ -79,7 +80,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn setup(algo: &Algo, dataset: Vec<Pos>, window_w: f64, window_h: f64) -> Self {
+    pub fn setup(algo: &Algo, dataset: Vec<Pos>, max_values: Pos, window_w: f64, window_h: f64) -> Self {
         let opengl: OpenGL = OpenGL::V3_2;
         let window: GlutinWindow = WindowSettings::new(match algo {
             Algo::Ols => "learn - ordinary least squares",
@@ -99,6 +100,7 @@ impl Game {
             window: window,
             gl: GlGraphics::new(opengl),
             dataset: dataset,
+            max_values: max_values,
             srs_b_list: vec![0.0],
             srs_m_list: vec![0.0],
             m: 1.0,
@@ -190,36 +192,32 @@ impl Game {
     }
 
     pub fn render_sq_residuals_sum_plot(&mut self, event: &RenderArgs) { 
-        // render squared residuals sum of b points
+        // calculate points for squared residuals sum
         let ellipse_size: f64 = 5.0;
-        let max_sum: f64 = max_f64(&self.srs_b_list);
-        let squares: Vec<graphics::types::Rectangle> = self.srs_b_list.iter().enumerate().map(|(index, sum)| {
-            let scaled_sum: f64 = scale(*sum, 0.0, max_sum, 0.0, 1.0);
-            let scaled_x: f64 = scale(index as f64, 0.0, self.srs_b_list.len() as f64, 0.0, 1.0);
-            let pos: Pos = Pos::new(scaled_x, scaled_sum);
-            let scaled_pos: Pos = pos.scale(&self.sumplot_space);
-            return graphics::rectangle::square(
-                scaled_pos.x - ellipse_size / 2.0,
-                scaled_pos.y - ellipse_size / 2.0,
-                ellipse_size);
-        }).collect();
-        self.gl.draw(event.viewport(), |context, gl| {
-            squares.into_iter().for_each(|square| graphics::ellipse(WHITE, square, context.transform, gl));
-        });
+        let max_b_sum: f64 = max_f64(&self.srs_b_list);
+        let max_m_sum: f64 = max_f64(&self.srs_m_list);
 
-        // render squared residuals sum of m points
-        let ellipse_size: f64 = 5.0;
-        let max_sum: f64 = max_f64(&self.srs_m_list);
-        let squares: Vec<graphics::types::Rectangle> = self.srs_m_list.iter().enumerate().map(|(index, sum)| {
-            let scaled_sum: f64 = scale(*sum, 0.0, max_sum, 0.0, 1.0);
-            let scaled_x: f64 = scale(index as f64, 0.0, self.srs_m_list.len() as f64, 0.0, 1.0);
-            let pos: Pos = Pos::new(scaled_x, scaled_sum);
-            let scaled_pos: Pos = pos.scale(&self.sumplot_space);
-            return graphics::rectangle::square(
-                scaled_pos.x - ellipse_size / 2.0,
-                scaled_pos.y - ellipse_size / 2.0,
-                ellipse_size);
-        }).collect();
+        let mut squares: Vec<graphics::types::Rectangle> = Vec::new();
+        for (index, (sum_m, sum_b)) in self.srs_m_list.iter().zip(self.srs_b_list.iter()).enumerate() {
+            let scaled_sum_b: f64 = scale(*sum_b, 0.0, max_b_sum, 0.0, 1.0);
+            let scaled_sum_m: f64 = scale(*sum_m, 0.0, max_m_sum, 0.0, 1.0);
+            let scaled_b_x: f64 = scale(index as f64, 0.0, self.srs_b_list.len() as f64, 0.0, 1.0);
+            let scaled_m_x: f64 = scale(index as f64, 0.0, self.srs_m_list.len() as f64, 0.0, 1.0);
+            let scaled_b_pos: Pos = Pos::new(scaled_b_x, scaled_sum_b).scale(&self.sumplot_space);
+            let scaled_m_pos: Pos = Pos::new(scaled_m_x, scaled_sum_m).scale(&self.sumplot_space);
+            squares.push(graphics::rectangle::square(
+                scaled_b_pos.x - ellipse_size / 2.0,
+                scaled_b_pos.y - ellipse_size / 2.0,
+                ellipse_size)
+            );
+            squares.push(graphics::rectangle::square(
+                scaled_m_pos.x - ellipse_size / 2.0,
+                scaled_m_pos.y - ellipse_size / 2.0,
+                ellipse_size)
+            );
+        }
+
+        // render points
         self.gl.draw(event.viewport(), |context, gl| {
             squares.into_iter().for_each(|square| graphics::ellipse(WHITE, square, context.transform, gl));
         });
@@ -229,6 +227,7 @@ impl Game {
         if self.linear_regression_finshed == false {
             match config.algo {
                 Algo::Ols => ordinary_least_squares(self),
+                Algo::Sgradient => subject_gradient_descent(self),
                 Algo::Gradient => gradient_descent(self)
             }
         }
