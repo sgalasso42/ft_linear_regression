@@ -31,6 +31,7 @@ fn main() {
             });
             game.render_scatter_plot(&event);
             game.render_residual_plot(&event);
+            game.render_sq_residuals_sum_plot(&event);
             game.render_separators(&event);
         }
         if let Some(_event) = e.update_args() {

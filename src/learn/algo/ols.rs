@@ -16,6 +16,7 @@ pub fn ordinary_least_squares(game: &mut Game) {
         num += (data.x - x_average) * (data.y - y_average);
         den += (data.x - x_average) * (data.x - x_average);
     }
+    game.srsum_list.push(0.0);
     game.m = num / den; // [!] to protect : can be 0 if all x values are the same
     game.b = y_average - game.m * x_average;
 }

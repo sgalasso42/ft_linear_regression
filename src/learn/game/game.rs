@@ -10,6 +10,7 @@ use opengl_graphics::{GlGraphics, OpenGL};
 
 use crate::parsing::args::*;
 use crate::maths::scale::*;
+use crate::maths::max_f64::*;
 use crate::algo::gradient::*;
 use crate::algo::ols::*;
 
@@ -64,9 +65,12 @@ pub struct Game {
     pub window_space: Space,
     pub splot_space: Space,
     pub rplot_space: Space,
+    pub sumplot_space: Space,
+    pub separator_size: f64,
     pub window: GlutinWindow,
     pub gl: GlGraphics,
     pub dataset: Vec<Pos>,
+    pub srsum_list: Vec<f64>,
     pub m: f64,
     pub b: f64
 }
@@ -79,36 +83,40 @@ impl Game {
             .exit_on_esc(true)
             .build()
             .expect("error: can't initialize the GlutinWindow");
+            let separator_size = 5.0;
         return Game {
+            separator_size: separator_size,
             window_space: Space::new(0.0, window_w, window_h, 0.0),
-            splot_space: Space::new(0.0, window_w / 2.0, window_h / 2.0, 0.0),
-            rplot_space: Space::new(0.0, window_w, window_h, window_h / 2.0),
+            splot_space: Space::new(0.0, window_w / 2.0 - separator_size, window_h / 2.0 - separator_size, 0.0),
+            rplot_space: Space::new(0.0, window_w, window_h, window_h / 2.0 + separator_size),
+            sumplot_space: Space::new(window_w / 2.0 + separator_size, window_w, window_h / 2.0 - separator_size, 0.0),
             window: window,
             gl: GlGraphics::new(opengl),
             dataset: dataset,
+            srsum_list: vec![0.0],
             m: 0.0,
             b: 0.0
         };
     }
 
     pub fn render_separators(&mut self, event: &RenderArgs) {
+        let separator_size: f64 = self.separator_size;
+
         // render vertical separator
-        let line_size: f64 = 5.0;
-        let pos0: Pos = Pos::new(1.0, 0.0).scale(&self.splot_space);
-        let pos1: Pos = Pos::new(1.0, 1.0).scale(&self.splot_space);
+        let pos0: Pos = Pos::new(0.5, 0.5).scale(&self.window_space);
+        let pos1: Pos = Pos::new(0.5, 1.0).scale(&self.window_space);
         self.gl.draw(event.viewport(), |c, gl| {
-            graphics::line(BLACK, line_size, [
+            graphics::line(BLACK, separator_size, [
                 pos0.x, pos0.y,
                 pos1.x, pos1.y],
             c.transform, gl);
         });
 
         // render horizontal separator
-        let line_size: f64 = 5.0;
-        let pos0: Pos = Pos::new(0.0, 1.0).scale(&self.rplot_space);
-        let pos1: Pos = Pos::new(1.0, 1.0).scale(&self.rplot_space);
+        let pos0: Pos = Pos::new(0.0, 0.5).scale(&self.window_space);
+        let pos1: Pos = Pos::new(1.0, 0.5).scale(&self.window_space);
         self.gl.draw(event.viewport(), |c, gl| {
-            graphics::line(BLACK, line_size, [
+            graphics::line(BLACK, separator_size, [
                 pos0.x, pos0.y,
                 pos1.x, pos1.y],
             c.transform, gl);
@@ -169,6 +177,25 @@ impl Game {
             lines.into_iter().for_each(|line| {
                 graphics::line(WHITE, line_size, line, context.transform, gl);
             });
+        });
+    }
+
+    pub fn render_sq_residuals_sum_plot(&mut self, event: &RenderArgs) { 
+        // render squared residuals sum points
+        let ellipse_size: f64 = 5.0;
+        let max_sum: f64 = max_f64(&self.srsum_list);
+        let squares: Vec<graphics::types::Rectangle> = self.srsum_list.iter().enumerate().map(|(index, sum)| {
+            let scaled_sum: f64 = scale(*sum, 0.0, max_sum, 0.0, 1.0);
+            let scaled_x: f64 = scale(index as f64, 0.0, self.srsum_list.len() as f64, 0.0, 1.0);
+            let pos: Pos = Pos::new(scaled_x, scaled_sum);
+            let scaled_pos: Pos = pos.scale(&self.sumplot_space);
+            return graphics::rectangle::square(
+                scaled_pos.x - ellipse_size / 2.0,
+                scaled_pos.y - ellipse_size / 2.0,
+                ellipse_size);
+        }).collect();
+        self.gl.draw(event.viewport(), |context, gl| {
+            squares.into_iter().for_each(|square| graphics::ellipse(WHITE, square, context.transform, gl));
         });
     }
 
