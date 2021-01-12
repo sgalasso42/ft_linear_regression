@@ -15,7 +15,7 @@ use crate::algo::ols::*;
 
 pub const GREY1: [f32; 4] = [0.11, 0.11, 0.11, 1.0];
 pub const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-// pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+pub const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 // pub const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 // pub const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 // pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
@@ -91,6 +91,30 @@ impl Game {
         };
     }
 
+    pub fn render_separators(&mut self, event: &RenderArgs) {
+        // render vertical separator
+        let line_size: f64 = 5.0;
+        let pos0: Pos = Pos::new(1.0, 0.0).scale(&self.splot_space);
+        let pos1: Pos = Pos::new(1.0, 1.0).scale(&self.splot_space);
+        self.gl.draw(event.viewport(), |c, gl| {
+            graphics::line(BLACK, line_size, [
+                pos0.x, pos0.y,
+                pos1.x, pos1.y],
+            c.transform, gl);
+        });
+
+        // render horizontal separator
+        let line_size: f64 = 5.0;
+        let pos0: Pos = Pos::new(0.0, 1.0).scale(&self.rplot_space);
+        let pos1: Pos = Pos::new(1.0, 1.0).scale(&self.rplot_space);
+        self.gl.draw(event.viewport(), |c, gl| {
+            graphics::line(BLACK, line_size, [
+                pos0.x, pos0.y,
+                pos1.x, pos1.y],
+            c.transform, gl);
+        });
+    }
+
     pub fn render_scatter_plot(&mut self, event: &RenderArgs) {
         // render data points
         let ellipse_size: f64 = 6.0;
@@ -110,17 +134,23 @@ impl Game {
         let pos0: Pos = Pos::new(0.0, self.b).scale(&self.splot_space);
         let pos1: Pos = Pos::new(1.0, self.m * 1.0 + self.b).scale(&self.splot_space);
         self.gl.draw(event.viewport(), |c, gl| {
-            graphics::line(WHITE, line_size, [pos0.x - line_size / 2.0, pos0.y - line_size / 2.0, pos1.x - line_size / 2.0, pos1.y - line_size / 2.0], c.transform, gl);
+            graphics::line(WHITE, line_size, [
+                pos0.x, pos0.y,
+                pos1.x, pos1.y],
+            c.transform, gl);
         });
     }
 
-    pub fn render_residual_plot(&mut self, event: &RenderArgs) {
+    pub fn render_residual_plot(&mut self, event: &RenderArgs) {  
         // render x axis
         let line_size: f64 = 1.0;
         let pos0: Pos = Pos::new(0.0, 0.5).scale(&self.rplot_space);
         let pos1: Pos = Pos::new(1.0, 0.5).scale(&self.rplot_space);
         self.gl.draw(event.viewport(), |c, gl| {
-            graphics::line(WHITE, line_size, [pos0.x, pos0.y, pos1.x, pos1.y], c.transform, gl);
+            graphics::line(WHITE, line_size, [
+                pos0.x, pos0.y,
+                pos1.x, pos1.y],
+            c.transform, gl);
         });
 
         // render residuals
