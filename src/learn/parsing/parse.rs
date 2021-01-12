@@ -7,7 +7,7 @@ use crate::game::game::*;
 use crate::parsing::args::*;
 use crate::maths::scale::*;
 
-pub fn parse_file(config: &Config) -> Vec<Pos> {
+pub fn parse_file(config: &Config) -> (Vec<Pos>, Pos) {
 	if !metadata(&config.file).expect("error: A problem occured with the file").is_file() {
         panic!("error: The file should be a file, I mean a real one, not a directory, hum... guess you got it");
 	}
@@ -32,8 +32,8 @@ pub fn parse_file(config: &Config) -> Vec<Pos> {
 			}
 		}
 	}
-	return dataset.iter().map(|value| Pos {
+	return (dataset.iter().map(|value| Pos {
 		x: scale(value.x, 0.0, max_values.x, 0.0, 1.0),
 		y: scale(value.y, 0.0, max_values.y, 0.0, 1.0),
-	}).collect();
+	}).collect(), max_values);
 }

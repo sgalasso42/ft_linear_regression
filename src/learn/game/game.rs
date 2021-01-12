@@ -20,6 +20,24 @@ pub const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 // pub const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 // pub const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 
+pub struct Space {
+    pub x0: f64,
+    pub x1: f64,
+    pub y0: f64,
+    pub y1: f64,
+}
+
+impl Space {
+    pub fn new(x0: f64, x1: f64, y0: f64, y1: f64) -> Self {
+        return Space {
+            x0: x0,
+            x1: x1,
+            y0: y0,
+            y1: y1
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Pos {
     pub x: f64,
@@ -27,16 +45,25 @@ pub struct Pos {
 }
 
 impl Pos {
-    pub fn new(x: f64, y: f64) -> Pos {
+    pub fn new(x: f64, y: f64) -> Self {
         return Pos {
             x: x,
             y: y
         }
     }
+
+    pub fn scale(&self, space: &Space) -> Self {
+        return Pos {
+            x: scale(self.x, 0.0, 1.0, space.x0, space.x1),
+            y: scale(self.y, 0.0, 1.0, space.y0, space.y1)
+        }
+    }
 }
 
 pub struct Game {
-    pub size: f64,
+    pub window_space: Space,
+    pub splot_space: Space,
+    pub rplot_space: Space,
     pub window: GlutinWindow,
     pub gl: GlGraphics,
     pub dataset: Vec<Pos>,
@@ -45,52 +72,73 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn setup(dataset: Vec<Pos>, window_size: f64) -> Self {
+    pub fn setup(dataset: Vec<Pos>, window_w: f64, window_h: f64) -> Self {
         let opengl: OpenGL = OpenGL::V3_2;
-        let window: GlutinWindow = WindowSettings::new("learn", [window_size, window_size])
+        let window: GlutinWindow = WindowSettings::new("learn", [window_w, window_h])
             .graphics_api(opengl)
             .exit_on_esc(true)
             .build()
             .expect("error: can't initialize the GlutinWindow");
         return Game {
-            size: window_size,
+            window_space: Space::new(0.0, window_w, window_h, 0.0),
+            splot_space: Space::new(0.0, window_w / 2.0, window_h / 2.0, 0.0),
+            rplot_space: Space::new(0.0, window_w, window_h, window_h / 2.0),
             window: window,
             gl: GlGraphics::new(opengl),
             dataset: dataset,
             m: 0.0,
             b: 0.0
-        }; 
+        };
     }
 
-    pub fn render(&mut self, event: &RenderArgs) {
-        self.gl.draw(event.viewport(), |_context, gl| {
-            graphics::clear(GREY1, gl);
-        });
-        
+    pub fn render_scatter_plot(&mut self, event: &RenderArgs) {
+        // render data points
         let ellipse_size: f64 = 6.0;
         let squares: Vec<graphics::types::Rectangle> = self.dataset.iter().map(|pos| {
-            graphics::rectangle::square(
-                scale(pos.x, 0.0, 1.0, 0.0, self.size) - ellipse_size / 2.0,
-                scale(pos.y, 0.0, 1.0, self.size, 0.0) - ellipse_size / 2.0,
-                ellipse_size)
+            let scaled_pos: Pos = pos.scale(&self.splot_space);
+            return graphics::rectangle::square(
+                scaled_pos.x - ellipse_size / 2.0,
+                scaled_pos.y - ellipse_size / 2.0,
+                ellipse_size);
         }).collect();
         self.gl.draw(event.viewport(), |context, gl| {
             squares.into_iter().for_each(|square| graphics::ellipse(WHITE, square, context.transform, gl));
         });
 
-        let line_thickness: f64 = 1.0;
-        let pos0: Pos = Pos::new(0.0, self.m * 0.0 + self.b);
-        let pos1: Pos = Pos::new(1.0, self.m * 1.0 + self.b);
-        let scaled_pos0: Pos = Pos {
-            x: scale(pos0.x, 0.0, 1.0, 0.0, self.size) - line_thickness / 2.0,
-            y: scale(pos0.y, 0.0, 1.0, self.size, 0.0) - line_thickness / 2.0
-        };
-        let scaled_pos1: Pos = Pos {
-            x: scale(pos1.x, 0.0, 1.0, 0.0, self.size) - line_thickness / 2.0,
-            y: scale(pos1.y, 0.0, 1.0, self.size, 0.0) - line_thickness / 2.0
-        };
+        // render regression line
+        let line_size: f64 = 1.0;
+        let pos0: Pos = Pos::new(0.0, self.b).scale(&self.splot_space);
+        let pos1: Pos = Pos::new(1.0, self.m * 1.0 + self.b).scale(&self.splot_space);
         self.gl.draw(event.viewport(), |c, gl| {
-            graphics::line(WHITE, line_thickness, [scaled_pos0.x, scaled_pos0.y, scaled_pos1.x, scaled_pos1.y], c.transform, gl);
+            graphics::line(WHITE, line_size, [pos0.x - line_size / 2.0, pos0.y - line_size / 2.0, pos1.x - line_size / 2.0, pos1.y - line_size / 2.0], c.transform, gl);
+        });
+    }
+
+    pub fn render_residual_plot(&mut self, event: &RenderArgs) {
+        // render x axis
+        let line_size: f64 = 1.0;
+        let pos0: Pos = Pos::new(0.0, 0.5).scale(&self.rplot_space);
+        let pos1: Pos = Pos::new(1.0, 0.5).scale(&self.rplot_space);
+        self.gl.draw(event.viewport(), |c, gl| {
+            graphics::line(WHITE, line_size, [pos0.x, pos0.y, pos1.x, pos1.y], c.transform, gl);
+        });
+
+        // render residuals
+        let line_size: f64 = 1.0;
+        let lines: Vec<[f64; 4]> = self.dataset.iter().map(|pos| {
+            let calc_pos0: Pos = Pos::new(pos.x, 0.5 + pos.y - (self.b + self.m * pos.x));
+            let calc_pos1: Pos = Pos::new(pos.x, 0.5);
+            let scaled_pos0: Pos = calc_pos0.scale(&self.rplot_space);
+            let scaled_pos1: Pos = calc_pos1.scale(&self.rplot_space);
+            return [
+                scaled_pos0.x, scaled_pos0.y,
+                scaled_pos1.x, scaled_pos1.y
+            ];
+        }).collect();
+        self.gl.draw(event.viewport(), |context, gl| {
+            lines.into_iter().for_each(|line| {
+                graphics::line(WHITE, line_size, line, context.transform, gl);
+            });
         });
     }
 

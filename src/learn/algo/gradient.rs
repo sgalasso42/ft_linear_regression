@@ -1,11 +1,22 @@
 use crate::game::game::*;
 
 pub fn gradient_descent(game: &mut Game) {
-    let learning_rate: f64 = 0.01;
+    let learning_rate: f64 = 0.2;
+    let (msum, bsum): (f64, f64) = error_sum(game);
+    let m_tmp = (learning_rate * msum) / game.dataset.len() as f64;
+    let b_tmp = (learning_rate * bsum) / game.dataset.len() as f64;
+    game.m += m_tmp;
+    game.b += b_tmp;
+}
+
+fn error_sum(game: &Game) -> (f64, f64) {
+    let mut msum: f64 = 0.0;
+    let mut bsum: f64 = 0.0;
     for data in game.dataset.iter() {
-        let guess = game.m * data.x + game.b;
+        let guess = game.b + game.m * data.x;
         let error = data.y - guess;
-        game.m += (error * data.x) * learning_rate;
-        game.b += (error) * learning_rate;
+        msum += error * data.x;
+        bsum += error;
     }
+    return (msum, bsum);
 }
