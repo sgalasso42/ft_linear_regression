@@ -1,6 +1,6 @@
 # ft_linear_regression
 A linear regression implementation, written in Rust<br/>
-This is a 42 school project <strong>[Final grade: work in progress]</strong>
+This is a 42 school project <strong>[Final grade: 125%]</strong>
 
 ---
 ## Demo
