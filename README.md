@@ -29,7 +29,7 @@ Then you can build the project
 ```
 ### Options
 ```
--a, --algo <algo>    Algo selection, choose from 'ols' or 'sgradient', 'gradient'
+-a, --algo <algo>    Algo selection, choose from 'ols' or 'gradient'
 ```
 
 ---
