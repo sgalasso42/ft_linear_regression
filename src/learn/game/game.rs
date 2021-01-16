@@ -221,7 +221,6 @@ impl Game {
         if self.linear_regression_finshed == false {
             match config.algo {
                 Algo::Ols => ordinary_least_squares(self),
-                Algo::Sgradient => subject_gradient_descent(self),
                 Algo::Gradient => gradient_descent(self)
             }
         }

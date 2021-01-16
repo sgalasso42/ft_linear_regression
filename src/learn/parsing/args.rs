@@ -2,7 +2,7 @@ use clap::{Arg, App};
 
 #[derive(Debug, PartialEq)]
 pub enum Algo {
-	Sgradient, Gradient, Ols
+	Gradient, Ols
 }
 
 #[derive(Debug, PartialEq)]
@@ -26,13 +26,12 @@ impl Config {
                 .short("a")
                 .long("algo")
                 .takes_value(true)
-                .help("Algo selection, choose from 'ols' or 'gradient' or 'sgradient"))
+                .help("Algo selection, choose from 'ols' or 'gradient'"))
             .get_matches();
         return Config {
             file: matches.value_of("file").unwrap_or("").to_string(),
             algo: match matches.value_of("algo").unwrap_or("conflict") {
                 "gradient" => Algo::Gradient,
-                "sgradient" => Algo::Sgradient,
                 "ols" => Algo::Ols,
                 _ => Algo::Gradient
             }
